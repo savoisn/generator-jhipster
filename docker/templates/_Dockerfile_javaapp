@@ -1,0 +1,9 @@
+FROM java:openjdk-8u45
+MAINTAINER Nicolas SAVOIS <nicolas.savois@gmail.com>
+
+# make sure the package repository is up to date
+ADD startmeup-0.0.1-SNAPSHOT.war /home/jhipster/target/startmeup-0.0.1-SNAPSHOT.war
+
+#run application with production profil
+CMD cd /home/jhipster/target && java -jar startmeup-0.0.1-SNAPSHOT.war --spring.profiles.active=prod
+
