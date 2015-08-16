@@ -9,8 +9,10 @@ jhipster:
     - "4022:22"
   links:
     - mongo:mongo
+    - mysql:mysql
     - postgres:postgres
     - elasticsearch:elasticsearch
+    - hazelcast:hazelcast
 
 postgres:
   image: postgres:9.4.4
@@ -39,3 +41,14 @@ hazelcast:
   ports:
     - "5701:5701"
     - "54327:54327/udp"
+
+mysql:
+  image: mysql:latest
+  ports:
+    - "3306:3306"
+  volumes:
+    - $PWD/mysqldata:/var/lib/mysql
+  environment:
+    MYSQL_PASS: "**ChangeMe**"
+    MYSQL_ROOT_PASSWORD: "root"
+
