@@ -11,6 +11,8 @@ jhipster:
     - mongo:mongo
     - postgres:postgres
     - elasticsearch:elasticsearch
+    - cassandra:cassandra
+    - hazelcast:hazelcast
 
 postgres:
   image: postgres:9.4.4
