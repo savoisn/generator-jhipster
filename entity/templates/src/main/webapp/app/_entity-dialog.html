@@ -28,7 +28,7 @@
     } else if (fields[fieldId].fieldType == 'byte[]') {
         fieldInputType = 'hidden';
     } %>
-        <div class="form-group"<% if (fields[fieldId].fieldType == 'byte[]') { %> ngf-drop ngf-change="set<%= fields[fieldId].fieldNameCapitalized %>($files, <%= entityInstance %>)"<% if (fields[fieldId].fieldTypeBlobContent == 'image') { %> ngf-accept="'image/*'"<% } %><% } %>>
+        <div class="form-group"<% if (fields[fieldId].fieldType == 'byte[]') { %> ngf-drop ngf-change="set<%= fields[fieldId].fieldNameCapitalized %>($file, <%= entityInstance %>)"<% if (fields[fieldId].fieldTypeBlobContent == 'image') { %> ngf-pattern="'image/*'"<% } %><% } %>>
             <label translate="<%= translationKey %>" for="field_<%= fields[fieldId].fieldName %>"><%=fields[fieldId].fieldNameCapitalized%></label><%
             if (fields[fieldId].fieldIsEnum) { %>
             <select class="form-control" name="<%= fields[fieldId].fieldName %>" ng-model="<%= entityInstance %>.<%= fields[fieldId].fieldName %>" id="field_<%= fields[fieldId].fieldName %>"<% if (fields[fieldId].fieldValidate == true && fields[fieldId].fieldValidateRules.indexOf('required') != -1) { %> required<% } %>><%
@@ -36,7 +36,7 @@
                var values = fields[fieldId].fieldValues.split(",");
                for (key in values) {
                  var value = values[key]; %>
-               <option value="<%= value %>" translate="<%=enumPrefix%>.<%=value%>"><%= value %></option><%
+                <option value="<%= value %>" translate="<%=enumPrefix%>.<%=value%>"><%= value %></option><%
                } %>
             </select><% } else { %><% if (fields[fieldId].fieldType == 'byte[]') { %>
             <div><% if (fields[fieldId].fieldTypeBlobContent == 'image') { %>
@@ -51,7 +51,7 @@
                     </button>
                 </div>
                 <button type="file" ngf-select class="btn btn-default btn-block"
-                        ngf-change="set<%= fields[fieldId].fieldNameCapitalized %>($files, <%= entityInstance %>)"<% if (fields[fieldId].fieldTypeBlobContent == 'image') { %> accept="image/*" translate="entity.action.addimage"<% } else { %> translate="entity.action.addblob"<% } %>>
+                        ngf-change="set<%= fields[fieldId].fieldNameCapitalized %>($file, <%= entityInstance %>)"<% if (fields[fieldId].fieldTypeBlobContent == 'image') { %> accept="image/*" translate="entity.action.addimage"<% } else { %> translate="entity.action.addblob"<% } %>>
                     <% if (fields[fieldId].fieldTypeBlobContent == 'image') { %>Add image<% } else { %>Add blob<% } %>
                 </button>
             </div><% } %>
@@ -103,28 +103,48 @@
             </div><% } %>
         </div><% } %>
 <% for (relationshipId in relationships) {
+    var relationshipType = relationships[relationshipId].relationshipType;
+    var ownerSide = relationships[relationshipId].ownerSide;
     var otherEntityName = relationships[relationshipId].otherEntityName;
     var relationshipName = relationships[relationshipId].relationshipName;
     var relationshipFieldName = relationships[relationshipId].relationshipFieldName;
-    var translationKey = keyPrefix + relationshipName;
-     if (relationships[relationshipId].relationshipType == 'many-to-one') { %>
+    var otherEntityField = relationships[relationshipId].otherEntityField;
+    var otherEntityFieldCapitalized = relationships[relationshipId].otherEntityFieldCapitalized;
+    var translationKey = keyPrefix + relationshipName; 
+-%>
+<% if (relationshipType == 'many-to-one' || (relationshipType == 'one-to-one' && ownerSide == true && otherEntityName == 'user')) { -%>
         <div class="form-group">
             <label translate="<%= translationKey %>" for="field_<%= relationshipName %>"><%=relationshipName %></label>
-            <select class="form-control" id="field_<%= relationshipName %>" name="<%= relationshipName %>" ng-model="<%=entityInstance %>.<%=relationshipFieldName %>.id" ng-options="<%=otherEntityName %>.id as <%=otherEntityName %>.<%=relationships[relationshipId].otherEntityField %> for <%=otherEntityName %> in <%=otherEntityName.toLowerCase() %>s">
+            <% if (dto == 'no') { %>
+            <select class="form-control" id="field_<%= relationshipName %>" name="<%= relationshipName %>" ng-model="<%= entityInstance %>.<%=relationshipFieldName %>" ng-options="<%=otherEntityName %> as <%=otherEntityName %>.<%=otherEntityField %> for <%=otherEntityName %> in <%=otherEntityName.toLowerCase() %>s track by <%=otherEntityName %>.id">
+                <option value=""></option>
             </select>
-        </div><% } else if (relationships[relationshipId].relationshipType == 'one-to-one' && relationships[relationshipId].ownerSide == true) {
-            %>
+            <% } else { %>
+            <select class="form-control" id="field_<%= relationshipName %>" name="<%= relationshipName %>" ng-model="<%= entityInstance %>.<%=relationshipFieldName %>Id" ng-options="<%=otherEntityName %>.id as <%=otherEntityName %>.<%=otherEntityField %> for <%=otherEntityName %> in <%=otherEntityName.toLowerCase() %>s">
+                <option value=""></option>
+            </select>
+            <% } %>
+        </div>
+<% } else if (relationshipType == 'one-to-one' && ownerSide == true) { -%>
         <div class="form-group">
             <label translate="<%= translationKey %>" for="field_<%= relationshipName %>"><%=relationshipName %></label>
-            <select class="form-control" id="field_<%= relationshipName %>" name="<%= relationshipName %>" ng-model="<%=entityInstance %>.<%=relationshipFieldName %>.id" ng-options="<%=relationshipFieldName %>.id as <%=relationshipFieldName %>.<%=relationships[relationshipId].otherEntityField %> for <%=relationshipFieldName %> in <%=relationshipFieldName.toLowerCase() %>s">
+            <% if (dto == 'no') { %>
+            <select class="form-control" id="field_<%= relationshipName %>" name="<%= relationshipName %>" ng-model="<%= entityInstance %>.<%=relationshipFieldName %>" ng-options="<%=otherEntityName %> as <%=otherEntityName %>.<%=otherEntityField %> for <%=otherEntityName %> in <%=relationshipFieldName.toLowerCase() %>s | orderBy:'id' track by <%=otherEntityName %>.id">
+                <option value=""></option>
             </select>
-        </div><% } else if (relationships[relationshipId].relationshipType == 'many-to-many' && relationships[relationshipId].ownerSide == true) {
-            %>
+            <% } else { %>
+            <select class="form-control" id="field_<%= relationshipName %>" name="<%= relationshipName %>" ng-model="<%= entityInstance %>.<%=relationshipFieldName %>Id" ng-options="<%=otherEntityName %>.id as <%=otherEntityName %>.<%=otherEntityField %> for <%=otherEntityName %> in <%=relationshipFieldName.toLowerCase() %>s | orderBy:'id'">
+                <option value=""></option>
+            </select>
+            <% } %>
+        </div>
+<% } else if (relationshipType == 'many-to-many' && relationships[relationshipId].ownerSide == true) { -%>
         <div class="form-group">
             <label translate="<%= translationKey %>" for="field_<%= relationshipName %>"><%=relationshipName %></label>
-            <select class="form-control" id="field_<%= relationshipName %>" multiple name="<%= relationshipName %>" ng-model="<%=entityInstance %>.<%=relationshipFieldName %>s" ng-options="<%=otherEntityName %> as <%=otherEntityName %>.<%=relationships[relationshipId].otherEntityField %> for <%=otherEntityName %> in <%=otherEntityName.toLowerCase() %>s track by <%=otherEntityName %>.id">
-            </select>
-        </div><% } } %>
+            <select class="form-control" id="field_<%= relationshipName %>" multiple name="<%= relationshipName %>" ng-model="<%=entityInstance %>.<%=relationshipFieldName %>s" ng-options="<%=otherEntityName %> as <%=otherEntityName %>.<%=otherEntityField %> for <%=otherEntityName %> in <%=otherEntityName.toLowerCase() %>s track by <%=otherEntityName %>.id"></select>
+        </div>
+<% } -%>
+<% } -%>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="clear()">

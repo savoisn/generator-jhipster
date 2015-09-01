@@ -21,7 +21,7 @@
     </prerequisites>
 
     <properties>
-        <hikaricp.version><% if (javaVersion == '8') { %>2.4.0<% } else { %>2.3.9<% } %></hikaricp.version><% if (javaVersion == '8') { %>
+        <hikaricp.version>2.4.0</hikaricp.version><% if (javaVersion == '8') { %>
         <assertj-core.version>3.1.0</assertj-core.version><% } %><% if (javaVersion == '7') { %>
         <assertj-core.version>2.1.0</assertj-core.version><% } %>
         <awaitility.version>1.4.0</awaitility.version>
@@ -41,7 +41,7 @@
         <liquibase-slf4j.version>1.2.1</liquibase-slf4j.version>
         <liquibase-hibernate4.version>3.5</liquibase-hibernate4.version><% } %><% if (databaseType == 'cassandra') { %>
         <lz4.version>1.3.0</lz4.version><% } %>
-        <mapstruct.version>1.0.0.CR1</mapstruct.version>
+        <mapstruct.version>1.0.0.CR2</mapstruct.version>
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <maven-enforcer-plugin.version>1.3.1</maven-enforcer-plugin.version>
         <maven-sortpom-plugin.version>2.3.0</maven-sortpom-plugin.version>
@@ -213,7 +213,7 @@
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP<% if (javaVersion == '7') { %>-java6<% } %></artifactId>
+            <artifactId>HikariCP</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>tools</artifactId>
@@ -469,6 +469,7 @@
         </dependency><% } %>
     </dependencies>
     <build>
+        <defaultGoal>spring-boot:run</defaultGoal>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -703,7 +704,7 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </dependency>
-            </dependencies><% if(frontendBuilder == 'grunt' && useCompass) { %>
+            </dependencies><% if(frontendBuilder == 'grunt' && useSass) { %>
             <build>
                 <plugins>
                     <plugin>
@@ -720,7 +721,7 @@
                                 <configuration>
                                     <skipTests>true</skipTests>
                                     <buildTool>grunt</buildTool>
-                                    <buildArgs>compass:server --force</buildArgs>
+                                    <buildArgs>sass:server --force</buildArgs>
                                 </configuration>
                             </execution>
                         </executions>
