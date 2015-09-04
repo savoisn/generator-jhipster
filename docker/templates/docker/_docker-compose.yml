@@ -8,19 +8,20 @@ jhipster:
     - "3001:3001"
     - "4022:22"
   links:
+<% 
+var refdb=devDatabaseType; 
+if (refdb == 'mongodb') { %>
     - mongo:mongo
+<% } else if (refdb == 'postgresql'){ %>
     - postgres:postgres
+<% } else if (refdb == 'mysql'){ %>
+    - mysql:mysql
+<% } %>
     - elasticsearch:elasticsearch
     - cassandra:cassandra
     - hazelcast:hazelcast
 
-postgres:
-  image: postgres:9.4.4
-  ports:
-    - "5432:5432"
-  volumes:
-    - $PWD/pgdata:/var/lib/prostgresql/data
-
+<% if (refdb == 'mongodb') { %>
 mongo:
   image: mongo:3.1
   ports:
@@ -28,6 +29,28 @@ mongo:
   volumes:
     - $PWD/mongodata:/data/db
 
+
+<% } else if (refdb == 'postgresql'){ %>
+postgres:
+  image: postgres:9.4.4
+  ports:
+    - "5432:5432"
+  volumes:
+    - $PWD/pgdata:/var/lib/prostgresql/data
+
+<% } else if (refdb == 'mysql'){ %>
+
+mysql: 
+  image: mysql:latest 
+  ports: 
+     - "3306:3306" 
+  volumes:
+     - $PWD/mysqldata:/var/lib/mysql
+  environment:
+     MYSQL_PASS: "**ChangeMe**"
+     MYSQL_ROOT_PASSWORD: "root"
+
+<% } %>
 elasticsearch:
   image: elasticsearch:1.6
   ports:
@@ -48,3 +71,4 @@ hazelcast:
   ports:
     - "5701:5701"
     - "54327:54327/udp"
+
